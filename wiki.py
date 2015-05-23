@@ -54,7 +54,6 @@ class BasicHandler(webapp2.RequestHandler):
         self.response.headers.add_header('Set-Cookie', 'user_id=')
 
     def initialize(self, *a, **kw):
-        print 'hi'
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
         self.user = uid and User.by_id(int(uid))
@@ -217,7 +216,6 @@ class Post(db.Model):
 class EditPage(BasicHandler):
     def get(self, page_re):
         if self.user:
-            print 'page_re', page_re
             urlname = '/' if page_re == '/' else page_re.split('/')[1]
             p = Post.newest_by_urlname(urlname)
             if p:
@@ -246,11 +244,13 @@ class WikiPage(BasicHandler):
     def get(self, page_re):
         urlname = '/' if page_re == '/' else page_re.split('/')[1]
         p = Post.newest_by_urlname(urlname)
-        print 'urlname', urlname
         if p:
             self.render("front.html", post = p, edit=page_re)
         else:
-            self.redirect('/_edit' + page_re)
+            if self.user:
+                self.redirect('/_edit' + page_re)
+            else:
+                self.render("front.html")
 
 #class MainPage(BasicHandler):
 #    def get(self):

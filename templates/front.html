@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-  {{post.content.replace('\n', '<br>') | safe}}
+  {% if post %}
+    {{post.content.replace('\n', '<br>') | safe}}
+  {% endif %}
   <br><br>
 {% endblock %}
