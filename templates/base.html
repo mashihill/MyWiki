@@ -13,8 +13,10 @@
 
   <div class="login-area">
     {% if user %}
-      {% if edit %}
-        <a class="login-link" href="/_edit{{edit}}">edit</a>, 
+      {% if path %}
+        <a class="login-link" href="/_history{{path}}">history</a>
+        |
+        <a class="login-link" href="/_edit{{path}}">edit</a>, 
       {% endif %}
       {{user.name}} (<a class="login-link" href="/logout">logout</a>)
     {% else %}

@@ -205,7 +205,7 @@ class Post(db.Model):
 
     @classmethod
     def by_urlname(cls, urlname):
-        p = Post.all().ancestor(post_key()).filter('urlname =', urlname)
+        p = Post.all().ancestor(post_key()).filter('urlname =', urlname).order('-created')
         return p
 
     @classmethod
@@ -240,12 +240,25 @@ class EditPage(BasicHandler):
         else:
             self.redirect(page_re)
 
+class HistoryPage(BasicHandler):
+    def get(self, page_re):
+        urlname = '/' if page_re == '/' else page_re.split('/')[1]
+        posts = Post.by_urlname(urlname)
+        if posts:
+            self.render("history.html", posts=posts, path=page_re)
+
+
 class WikiPage(BasicHandler):
     def get(self, page_re):
         urlname = '/' if page_re == '/' else page_re.split('/')[1]
-        p = Post.newest_by_urlname(urlname)
+        v = self.request.get('v')
+        print 'page_re', page_re
+        if v:
+            p = Post.by_id(int(v))
+        else:
+            p = Post.newest_by_urlname(urlname)
         if p:
-            self.render("front.html", post = p, edit=page_re)
+            self.render("front.html", post = p, path=page_re)
         else:
             if self.user:
                 self.redirect('/_edit' + page_re)
@@ -265,5 +278,6 @@ app = webapp2.WSGIApplication([
                               ('/login/?', Login),
                               ('/logout/?', Logout),
                               ('/_edit' + PAGE_RE, EditPage),
+                              ('/_history' + PAGE_RE, HistoryPage),
                               (PAGE_RE, WikiPage)
                               ], debug=True)
